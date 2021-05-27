@@ -1,9 +1,13 @@
-import sqlite3 from 'sqlite3'
-import { open } from 'sqlite'
+import sqlite3 from "sqlite3";
+import path from "path";
 
-(async () => {
-    export const db = await open({
-      filename: '../db/novel.db',
-      driver: sqlite3.cached.Database
-    })
-})()
+const dbPath = path.resolve(__dirname, "../db/novel.db");
+
+export const db = new sqlite3.Database(dbPath, (err) => {
+    if (err) {
+        console.log(err.message);
+        throw err;
+    } else {
+        console.log("conected to db");
+    }
+});
