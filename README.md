@@ -9,22 +9,22 @@ I. Cach dung:
 
 II. List API:
 1. Get list truyen theo catId:
-- API: GET /api/v1/novel-by-catId/:catId
+- API: GET /api/v1/book-by-catId/:catId
 - request:
 + catId lay tu path
 + offset: lay tu req.query, mac dinh la 0
 + limit: lay tu req.query, mac dinh la 10
 
 2. Get list truyen moi nhat:
-- API: GET /api/v1/newest-novel
+- API: GET /api/v1/newest-book
 - request:
 + offset: lay tu req.query, mac dinh la 0
 + limit: lay tu req.query, mac dinh la 10
 
 3. Get list chapter theo truyen:
-- API: GET /api/v1/chapter-by-novelId/:novelId
+- API: GET /api/v1/chapter-by-bookId/:bookId
 - request:
-+ novelId lay tu path
++ bookId lay tu path
 + offset: lay tu req.query, mac dinh la 0
 + limit: lay tu req.query, mac dinh la 10
 
@@ -34,6 +34,8 @@ II. List API:
 + chapterId lay tu path
 
 5. Get truyen search by name:
-- API: GET /api/v1/novel-search-by-name
+- API: GET /api/v1/book-search-by-name
 - request:
 + search: lay tu req.query, mac dinh la ""
++ offset: lay tu req.query, mac dinh la 0
++ limit: lay tu req.query, mac dinh la 10

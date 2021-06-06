@@ -8,7 +8,7 @@ export const sequelize = new Sequelize({
   password: env.DB_PASS,
   database: env.DB_DATABASE,
   dialect: 'mysql',
-  // logging: false
+  logging: false
 });
 
 const dbConnect = async () => {

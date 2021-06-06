@@ -1,139 +1,148 @@
-import express from "express";
-import { db } from "../db";
+import express from 'express';
+import { Op } from 'sequelize';
+import { db } from '../db';
+import { Book, Category, Chapter } from '../models';
 
-const apiPrefix = "/api/v1";
+const apiPrefix = '/api/v1';
 
 const router = express.Router();
 
-router.get(apiPrefix, (req, res) => res.json("test"));
+router.get(apiPrefix, (req, res) => res.json('test'));
 
-router.get(`${apiPrefix}/novel-by-catId/:catId`, (req, res) => {
-    const limit = parseInt(req.query.limit) || 10;
-    const offset = parseInt(req.query.offset) || 0;
-    const catId = parseInt(req.params.catId);
+router.get(`${apiPrefix}/book-by-catId/:catId`, async (req, res) => {
+  const limit = parseInt(req.query.limit) || 10;
+  const offset = parseInt(req.query.offset) || 0;
+  const catId = parseInt(req.params.catId);
 
-    const countSql =
-        "SELECT COUNT(*) FROM `novels` INNER JOIN `category_novel` on `novels`.`id` = `category_novel`.`novelId` INNER JOIN `categories` on `category_novel`.`categoryId` = `categories`.`id` WHERE `category_novel`.`categoryId` = ?";
-
-    let totalCount;
-    db.get(countSql, [catId], (err, rows) => {
-        if (err) {
-            res.status(400).json({ error: err.message });
-        }
-
-        totalCount = rows["COUNT(*)"];
-
-        const sql =
-            "SELECT novels.* FROM `novels` INNER JOIN `category_novel` on `novels`.`id` = `category_novel`.`novelId` INNER JOIN `categories` on `category_novel`.`categoryId` = `categories`.`id` WHERE `category_novel`.`categoryId` = ? ORDER BY updatedAt DESC LIMIT " +
-            `${offset}, ${limit}`;
-
-        db.all(sql, [catId], (err1, rows1) => {
-            if (err1) {
-                return res.status(400).json({ error: err1.message });
-            }
-
-            return res.status(200).json({
-                results: rows1,
-                totalCount: totalCount,
-            });
-        });
+  try {
+    const booksCount = await Book.count({
+      include: [
+        {
+          model: Category,
+          where: {
+            id: catId,
+          },
+        },
+      ],
     });
+
+    const books = await Book.findAll({
+      include: [
+        {
+          model: Category,
+          where: {
+            id: catId,
+          },
+        },
+      ],
+      limit: limit,
+      offset: offset,
+    });
+
+    return res.status(200).json({
+      results: books,
+      totalCount: booksCount,
+    });
+  } catch (err) {
+    return res.status(400).json({ error: err.message });
+  }
 });
 
-router.get(`${apiPrefix}/newest-novel`, (req, res) => {
-    const limit = parseInt(req.query.limit) || 10;
-    const offset = parseInt(req.query.offset) || 0;
+router.get(`${apiPrefix}/newest-book`, async (req, res) => {
+  const limit = parseInt(req.query.limit) || 10;
+  const offset = parseInt(req.query.offset) || 0;
 
-    const sql = "SELECT * FROM `novels` ORDER BY updatedAt DESC LIMIT " + `${offset}, ${limit}`;
-
-    db.all(sql, (err, rows) => {
-        if (err) {
-            return res.status(400).json({ error: err.message });
-        }
-
-        return res.status(200).json({
-            results: rows,
-        });
+  try {
+    const books = await Book.findAll({
+      order: [['updatedAt', 'DESC']],
+      limit: limit,
+      offset: offset,
     });
+
+    return res.status(200).json({
+      results: books,
+    });
+  } catch (err) {
+    return res.status(400).json({ error: err.message });
+  }
 });
 
-router.get(`${apiPrefix}/chapter-by-novelId/:novelId`, (req, res) => {
-    const limit = parseInt(req.query.limit) || 10;
-    const offset = parseInt(req.query.offset) || 0;
-    const novelId = parseInt(req.params.novelId);
+router.get(`${apiPrefix}/chapter-by-bookId/:bookId`, async (req, res) => {
+  const limit = parseInt(req.query.limit) || 10;
+  const offset = parseInt(req.query.offset) || 0;
+  const bookId = parseInt(req.params.bookId);
 
-    const countSql = "SELECT COUNT(*) from `chapters` where `novelId` = ?";
-
-    let totalCount;
-    db.get(countSql, [novelId], (err, rows) => {
-        if (err) {
-            res.status(400).json({ error: err.message });
-        }
-
-        totalCount = rows["COUNT(*)"];
-
-        const sql =
-            "SELECT `id`, `title`, `image`, `chapterNumber` from `chapters` where `novelId` = ? ORDER BY chapterNumber ASC LIMIT " +
-            `${offset}, ${limit}`;
-
-        db.all(sql, [novelId], (err1, rows1) => {
-            if (err1) {
-                return res.status(400).json({ error: err1.message });
-            }
-
-            return res.status(200).json({
-                results: rows1,
-                totalCount: totalCount,
-            });
-        });
+  try {
+    const chaptersCount = await Chapter.count({
+      where: { bookId: bookId },
     });
+
+    const chapters = await Chapter.findAll({
+      where: { bookId: bookId },
+      attributes: ['id', 'title', 'image', 'chapterNumber'],
+      order: [['chapterNumber', 'ASC']],
+      limit: limit,
+      offset: offset,
+    });
+
+    return res.status(200).json({
+      results: chapters,
+      totalCount: chaptersCount,
+    });
+  } catch (err) {
+    return res.status(400).json({ error: err.message });
+  }
 });
 
-router.get(`${apiPrefix}/chapter/:chapterId`, (req, res) => {
-    const chapterId = parseInt(req.params.chapterId);
+router.get(`${apiPrefix}/chapter/:chapterId`, async (req, res) => {
+  const chapterId = parseInt(req.params.chapterId);
 
-    const sql = "SELECT * FROM `chapters` WHERE `id` = ? LIMIT 1";
+  try {
+    const chapter = await Chapter.findByPk(chapterId);
 
-    db.get(sql, [chapterId], (err, rows) => {
-        if (err) {
-            res.status(400).json({ error: err.message });
-        }
+    if (!chapter) {
+      return res.status(400).json({ error: 'Not found' });
+    }
 
-        return res.status(200).json(rows);
-    });
+    return res.status(200).json(chapter);
+  } catch (err) {
+    return res.status(400).json({ error: err.message });
+  }
 });
 
-router.get(`${apiPrefix}/novel-search-by-name`, (req, res) => {
-    const limit = parseInt(req.query.limit) || 10;
-    const offset = parseInt(req.query.offset) || 0;
-    const search = req.query.search || "";
-    const searchValue = `%${search}%`;
+router.get(`${apiPrefix}/book-search-by-name`, async (req, res) => {
+  const limit = parseInt(req.query.limit) || 10;
+  const offset = parseInt(req.query.offset) || 0;
+  const search = req.query.search || '';
+  const searchValue = `%${search}%`;
 
-    const countSql = "SELECT COUNT(*) FROM `novels` WHERE `name` LIKE ? ORDER BY updatedAt DESC";
-
-    let totalCount;
-    db.get(countSql, [searchValue], (err, rows) => {
-        if (err) {
-            res.status(400).json({ error: err.message });
-        }
-
-        totalCount = rows["COUNT(*)"];
-
-        const sql =
-            "SELECT * FROM `novels` WHERE `name` LIKE ? ORDER BY updatedAt DESC LIMIT " +
-            `${offset}, ${limit}`;
-
-        db.all(sql, [searchValue], (err1, rows1) => {
-            if (err1) {
-                return res.status(400).json({ error: err1.message });
-            }
-
-            return res.status(200).json({
-                results: rows1,
-                totalCount: totalCount,
-            });
-        });
+  try {
+    const booksCount = await Book.count({
+      where: {
+        name: {
+          [Op.like]: searchValue,
+        },
+      },
     });
+
+    const books = await Book.findAll({
+      where: {
+        name: {
+          [Op.like]: searchValue,
+        },
+      },
+      limit: limit,
+      offset: offset,
+      order: [['updatedAt', 'DESC']],
+    });
+
+    return res.status(200).json({
+      results: books,
+      totalCount: booksCount,
+    });
+  } catch (err) {
+    return res.status(400).json({ error: err.message });
+  }
 });
 
 export default router;
