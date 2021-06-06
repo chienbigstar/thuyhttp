@@ -1,6 +1,10 @@
 I. Cach dung:
 - cp .env.example .env
 - docker-compose up
+- seed db lan dau:
+```
+  docker-compose exec api npx sequelize-cli db:seed:all --url 'mysql://books:books@mysql/books' --seeders-path '/app/src/seeders'
+```
 - port mac dinh: 3001
 
 II. List API:

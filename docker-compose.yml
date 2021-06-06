@@ -6,9 +6,10 @@ services:
       context: .
       dockerfile: ./.docker/api.Dockerfile
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     command: yarn dev
-    restart: unless-stopped
+    restart: always
     ports:
       - ${APP_PORT}:3000
     volumes:
@@ -29,6 +30,11 @@ services:
       MYSQL_DATABASE: ${DB_DATABASE}
     volumes:
       - db-data:/var/lib/mysql
+    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 3
     networks:
       - api-network
 
