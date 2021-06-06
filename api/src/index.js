@@ -1,5 +1,9 @@
 import express from 'express';
 import routes from './routes';
+import { migrateDb } from './config';
+
+// migrate db
+migrateDb();
 
 const app = express();
 const port = 3000;
