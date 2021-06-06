@@ -1,6 +1,5 @@
 import express from 'express';
 import { Op } from 'sequelize';
-import { db } from '../db';
 import { Book, Category, Chapter } from '../models';
 
 const apiPrefix = '/api/v1';
