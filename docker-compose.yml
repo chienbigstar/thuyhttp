@@ -6,15 +6,15 @@ services:
       context: .
       dockerfile: ./.docker/api.Dockerfile
     depends_on:
-      mysql:
-        condition: service_healthy
-    command: yarn dev
+      - mysql
+    command: ['sh', '-c', 'chmod +x /wait-for.sh && /wait-for.sh mysql:3306 -- yarn dev']
     restart: always
     ports:
       - ${APP_PORT}:3000
     volumes:
       - ./api:/app
       - ./.env:/app/.env
+      - ./.docker/wait-for.sh:/wait-for.sh
     networks:
       - api-network
     environment:
@@ -31,10 +31,6 @@ services:
     volumes:
       - db-data:/var/lib/mysql
     command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
-    healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-      timeout: 10s
-      retries: 3
     networks:
       - api-network
 
