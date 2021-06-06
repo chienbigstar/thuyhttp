@@ -1,6 +1,6 @@
 I. Cach dung:
-- yarn
-- yarn dev
+- cp .env.example .env
+- docker-compose up
 - port mac dinh: 3001
 
 II. List API:
