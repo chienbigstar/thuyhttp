@@ -7,7 +7,7 @@ services:
       dockerfile: ./.docker/api.Dockerfile
     depends_on:
       - mysql
-    command: ['sh', '-c', 'chmod +x /wait-for.sh && /wait-for.sh mysql:3306 -- yarn dev']
+    command: ['sh', '-c', 'chmod +x /wait-for.sh && /wait-for.sh mysql:3306 -- yarn && yarn dev']
     restart: always
     ports:
       - ${APP_PORT}:3000
