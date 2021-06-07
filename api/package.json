@@ -9,6 +9,8 @@
     "dev": "npx nodemon --ext js,json,yaml,yml,db,env --exec babel-node src/index.js"
   },
   "dependencies": {
+    "@babel/polyfill": "^7.12.1",
+    "@babel/runtime": "^7.14.0",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "mysql2": "^2.2.5",
@@ -19,6 +21,7 @@
     "@babel/cli": "^7.14.3",
     "@babel/core": "^7.14.3",
     "@babel/node": "^7.14.2",
+    "@babel/plugin-transform-runtime": "^7.14.3",
     "@babel/preset-env": "^7.14.2",
     "eslint": "^7.27.0",
     "nodemon": "^2.0.7"

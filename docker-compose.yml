@@ -29,7 +29,7 @@ services:
       MYSQL_PASSWORD: ${DB_PASS}
       MYSQL_DATABASE: ${DB_DATABASE}
     volumes:
-      - db-data:/var/lib/mysql
+      - ./db-data:/var/lib/mysql
     command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
     networks:
       - api-network
@@ -49,9 +49,9 @@ services:
     networks:
       - api-network
 
-volumes:
-  db-data:
-    driver: local
+# volumes:
+#   db-data:
+#     driver: local
 
 networks:
   api-network:
