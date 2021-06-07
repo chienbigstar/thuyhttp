@@ -8,6 +8,20 @@ const router = express.Router();
 
 router.get(apiPrefix, (req, res) => res.json('test'));
 
+router.get(`${apiPrefix}/categories`, async (req, res) => {
+  try {
+    const cates = await Category.findAll({
+      order: [['updatedAt', 'DESC']],
+    });
+
+    return res.status(200).json({
+      results: cates,
+    });
+  } catch (err) {
+    return res.status(400).json({ error: err.message });
+  }
+});
+
 router.get(`${apiPrefix}/book-by-catId/:catId`, async (req, res) => {
   const limit = parseInt(req.query.limit) || 10;
   const offset = parseInt(req.query.offset) || 0;
