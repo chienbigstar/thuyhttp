@@ -11,7 +11,6 @@ router.get(apiPrefix, (req, res) => res.json('test'));
 router.get(`${apiPrefix}/categories`, async (req, res) => {
   try {
     const cates = await Category.findAll({
-      order: [['updatedAt', 'DESC']],
     });
 
     return res.status(200).json({
